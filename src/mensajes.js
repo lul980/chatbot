@@ -6,62 +6,73 @@
 //
 // Formato de WhatsApp: *negritas*, _cursivas_, ~tachado~.
 
-const LINEA_ATENCION = '800 813 8500';
+const LINEA_ATENCION = '800 813 8500'; // guarda el número de T Queremos para reutilizarlo en varios mensajes
 
-const mensajes = {
-  bienvenida:
-    '¡Hola! 👋 Soy el asistente del *Botiquín para la calma* de LiFE Bienestar Estudiantil.\n\n' +
-    'Estoy aquí para darte un ejercicio rápido según cómo te sientas.\n' +
-    '_No sustituyo la atención de un profesional._',
+const mensajes = { // objeto con todos los textos que manda el bot
 
-  menu:
-    '¿Cómo te sientes hoy? Responde con el número o cuéntame con tus palabras:\n\n' +
-    '1️⃣ Estoy estresado/a\n' +
-    '2️⃣ Me siento ansioso/a\n' +
-    '3️⃣ Hoy me siento triste\n' +
-    '4️⃣ No he dormido bien\n' +
-    '5️⃣ Necesito una pausa\n' +
-    '6️⃣ Me siento solo/a',
+  bienvenida: // primer mensaje que ve el estudiante
+    '¡Hola! 👋😊 Soy el asistente del *Botiquín para la calma* 🌿de LiFE Bienestar Estudiantil.\n\n' + // saludo y presentación del bot
+    'Estoy aquí para darte un ejercicio rápido según cómo te sientas. ✨\n' + // explica para qué sirve el bot
+    '_No sustituyo la atención de un profesional._ 🤝', // aviso de que no reemplaza a un profesional
+
+  menu: // menú con las 6 cartas
+    '¿Cómo te sientes hoy? 🤗 Responde con el número o cuéntame con tus palabras: 💬\n\n' + // pregunta inicial
+    '1️⃣ Estoy estresado/a 😖\n' + // opción 1: estrés
+    '2️⃣ Me siento ansioso/a 😰\n' + // opción 2: ansiedad
+    '3️⃣ Hoy me siento triste 😢\n' + // opción 3: tristeza
+    '4️⃣ No he dormido bien 😴\n' + // opción 4: sueño
+    '5️⃣ Necesito una pausa ☕\n' + // opción 5: pausa
+    '6️⃣ Me siento solo/a 🫂', // opción 6: soledad
 
   // Se manda justo antes del ejercicio. {titulo} = nombre de la carta.
-  introEjercicio: 'Gracias por contarme. Para "{titulo}" te comparto este ejercicio 💙',
+  introEjercicio: 'Gracias por contarme 🙏. Para "{titulo}" te comparto este ejercicio 💙✨', // texto que acompaña la imagen de la carta
 
-  preguntaSeguimiento:
-    'Tómate tu tiempo para hacerlo. Cuando termines, cuéntame:\n\n' +
-    '*¿Cómo te sientes ahora?*\n' +
-    '1️⃣ Mejor\n' +
-    '2️⃣ Igual\n' +
-    '3️⃣ Peor\n\n' +
-    'Escribe *otro* para ver otro ejercicio o *menú* para volver al inicio.',
+  preguntaSeguimiento: // pregunta de seguimiento después del ejercicio
+    'Tómate tu tiempo para hacerlo ⏳. Cuando termines, cuéntame:\n\n' + // invita a hacer el ejercicio con calma
+    '*¿Cómo te sientes ahora?* 🤔\n' + // la pregunta en negritas
+    '1️⃣ Mejor 😊\n' + // respuesta 1
+    '2️⃣ Igual 😐\n' + // respuesta 2
+    '3️⃣ Peor 😞\n\n' + // respuesta 3
+    'Escribe *otro* 🔄 para ver otro ejercicio o *menú* 🏠 para volver al inicio.', // comandos disponibles
 
-  respuestaMejor:
-    '¡Qué bueno! 🙌 Recuerda que puedes volver al botiquín cuando lo necesites.\n\n' +
-    'Escribe *menú* si quieres otro ejercicio.',
+  respuestaMejor: // cuando el estudiante responde "mejor"
+    '¡Qué bueno! 🙌🎉 Recuerda que puedes volver al botiquín cuando lo necesites. 💙\n\n' + // cierre positivo
+    'Escribe *menú* 📋 si quieres otro ejercicio.', // recuerda cómo volver al menú
 
-  respuestaIgual: 'Está bien, a veces toma un poco más de tiempo. Probemos con otro ejercicio:',
+  respuestaIgual: 'Está bien, a veces toma un poco más de tiempo 🕐💛. Probemos con otro ejercicio 👇:', // cuando responde "igual"
 
-  respuestaPeor:
-    'Gracias por decírmelo. Lo que sientes es importante y no tienes que pasarlo solo/a. 💙\n\n' +
-    `📞 Llama al número de atención *T Queremos*: *${LINEA_ATENCION}*\n` +
-    '🏫 O acércate a un punto de apoyo emocional en tu campus.\n\n' +
-    'Si quieres, escribe *otro* para intentar otro ejercicio o *menú* para volver al inicio.',
+  respuestaPeor: // cuando el estudiante responde "peor"
+    'Gracias por decírmelo 🙏. Lo que sientes es importante y no tienes que pasarlo solo/a. 💙🫂\n\n' + // validación emocional
+    `📞 Llama al número de atención *T Queremos*: *${LINEA_ATENCION}*\n` + // da el teléfono de atención
+    '🏫 O acércate a un punto de apoyo emocional en tu campus.\n\n' + // sugiere apoyo presencial
+    'Si quieres, escribe *otro* 🔄 para intentar otro ejercicio o *menú* 🏠 para volver al inicio.', // opciones para seguir
 
-  sinMasEjercicios:
-    'Ya vimos todos los ejercicios de esta carta. Escribe *menú* para elegir otra.',
+  sinMasEjercicios: // cuando ya vio los 5 ejercicios de la carta
+    'Ya vimos todos los ejercicios de esta carta ✅. Escribe *menú* 📋 para elegir otra.', // pide volver al menú
 
-  noEntendi:
-    'Perdón, no te entendí bien. 😅',
+  noEntendi: // cuando el bot no entiende el mensaje
+    'Perdón, no te entendí bien. 😅🙈', // disculpa breve
+
+  // ===== WELLNESS CENTER ===== (textos para cuando preguntan dónde está; la foto y el enlace se configuran en conversacion.js)
+  // Acompaña la foto de la fachada del Wellness Center.
+  wellnessFoto: '📍 Este es el *Wellness Center* 🏢💙', // texto que acompaña la foto de la fachada
+  // Acompaña el enlace de Google Maps. {enlace} = el enlace que se pega en conversacion.js.
+  wellnessMapa: '🗺️ Aquí puedes ver cómo llegar:\n{enlace}', // texto con el enlace de Google Maps
+  // Se manda al final, después de la foto y el mapa.
+  wellnessCierre: 'Si necesitas algo más, escribe *menú* 📋 y te comparto un ejercicio 💙', // cierre después de dar la ubicación
+  // Se manda mientras todavía falten la foto y el enlace.
+  wellnessPendiente: 'Estoy actualizando la ubicación del *Wellness Center* 🛠️. Mientras tanto, pregunta en tu campus 🏫 o escribe *menú* 📋.', // aviso mientras falte la información
 
   // Se manda si detectamos palabras de riesgo (ver PALABRAS_CRISIS en conversacion.js).
-  crisis:
-    '💙 Lo que estás sintiendo es muy importante y mereces apoyo ahora mismo.\n\n' +
-    `📞 Número de atención *T Queremos*: *${LINEA_ATENCION}*\n` +
-    '📞 Línea de la Vida (24 h): *800 911 2000*\n' +
-    '🚨 Si estás en peligro inmediato, llama al *911*.\n\n' +
-    'No estás solo/a. Si quieres, sigo aquí contigo: escribe *menú* para hacer un ejercicio.',
+  crisis: // mensaje de crisis
+    '💙 Lo que estás sintiendo es muy importante y mereces apoyo ahora mismo. 🫂\n\n' + // validación
+    `📞 Número de atención *T Queremos*: *${LINEA_ATENCION}*\n` + // teléfono de T Queremos
+    '📞 Línea de la Vida (24 h): *800 911 2000*\n' + // teléfono de la Línea de la Vida
+    '🚨 Si estás en peligro inmediato, llama al *911*.\n\n' + // emergencias
+    'No estás solo/a. 🤍 Si quieres, sigo aquí contigo: escribe *menú* 📋 para hacer un ejercicio.', // acompañamiento
 
-  despedida:
-    'Gracias por cuidarte hoy. 💙 Aquí estaré cuando me necesites, solo escribe *hola*.',
-};
+  despedida: // cuando el estudiante se despide
+    'Gracias por cuidarte hoy. 💙🌸 Aquí estaré cuando me necesites 🤗, solo escribe *hola* 👋.', // mensaje de cierre
+}; // fin del objeto de mensajes
 
-module.exports = { mensajes, LINEA_ATENCION };
+module.exports = { mensajes, LINEA_ATENCION }; // exporta los textos para que conversacion.js los use

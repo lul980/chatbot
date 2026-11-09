@@ -1,0 +1,2 @@
+Guarda aqui la foto de la fachada del Wellness Center con el nombre: wellness-center.jpg
+Despues pega el enlace de Google Maps en src/conversacion.js (mapsUrl).
