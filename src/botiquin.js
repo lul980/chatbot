@@ -1,5 +1,11 @@
 // Contenido del "Botiquín para la calma" (LiFE Bienestar Estudiantil).
 // Transcrito de las cartas: cada carta es un estado de ánimo con 5 ejercicios.
+//
+// palabrasClave:   palabras que por sí solas dicen cómo se siente el estudiante.
+// palabrasContexto: palabras que solo cuentan si el mensaje NO es una pregunta
+//                   ("tengo examen y no me concentro" sí; "¿cuándo es el examen?" no).
+// Todo va sin acentos y en minúsculas. Una palabra sola busca el inicio de la palabra
+// ("estresad" encuentra "estresado" y "estresada"); una frase con espacios se busca tal cual.
 
 const botiquin = [
   {
@@ -7,7 +13,8 @@ const botiquin = [
     numero: 1,
     titulo: 'Estoy estresado/a',
     imagen: 'estres.png',
-    palabrasClave: ['estres', 'estresad', 'presion', 'agobiad', 'saturad', 'abrumad', 'tension', 'examen', 'entrega', 'tarea'],
+    palabrasClave: ['estres', 'estresad', 'presion', 'agobiad', 'saturad', 'abrumad', 'tension'],
+    palabrasContexto: ['examen', 'entrega', 'tarea', 'parcial', 'proyecto final'],
     ejercicios: [
       {
         titulo: 'Pausa con tus sentidos',
@@ -299,7 +306,11 @@ const botiquin = [
     numero: 6,
     titulo: 'Me siento solo/a',
     imagen: 'soledad.png',
-    palabrasClave: ['me siento sol', 'estoy sol', 'sin amigos', 'soledad', 'aislad', 'nadie', 'abandonad', 'extrano'],
+    palabrasClave: [
+      'me siento sol', 'estoy sol', 'sin amigos', 'soledad', 'aislad', 'nadie', 'abandonad',
+      // "extraño" solo cuenta cuando es extrañar a alguien (no "me pasó algo extraño").
+      'extrano a ', 'extrano mi', 'extrano mucho', 'los extrano', 'las extrano', 'te extrano', 'extrano estar',
+    ],
     ejercicios: [
       {
         titulo: 'Apertura y contacto con valores',

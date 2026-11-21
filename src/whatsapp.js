@@ -5,15 +5,28 @@ require('dotenv').config();
 const fs = require('fs');
 const os = require('os');
 const path = require('path');
+const crypto = require('crypto');
 const { exec } = require('child_process');
 const qrcode = require('qrcode-terminal');
 const QRCode = require('qrcode');
 const { Client, LocalAuth, MessageMedia } = require('whatsapp-web.js');
 const { responder } = require('./conversacion');
+const { mensajes } = require('./mensajes');
+const { crearCola } = require('./cola');
 const ollama = require('./ollama');
 
-const PAUSA_ENTRE_MENSAJES_MS = 700;
+const PAUSA_ENTRE_MENSAJES_MS = Number(process.env.PAUSA_ENTRE_MENSAJES_MS || 700);
+// Tiempo que se espera por si el estudiante manda varios mensajes seguidos (se contestan juntos).
+const ESPERA_MENSAJES_MS = Number(process.env.ESPERA_MENSAJES_MS || 1500);
+// Privacidad: por defecto NO se guarda el número ni el texto de los estudiantes en los logs.
+// Solo para pruebas: LOG_MENSAJES=true en .env.
+const LOG_MENSAJES = (process.env.LOG_MENSAJES || 'false').toLowerCase() === 'true';
+// Cada cuánto se revisa que la sesión de WhatsApp siga conectada.
+const REVISION_CONEXION_MS = 5 * 60 * 1000;
 const esperar = (ms) => new Promise((r) => setTimeout(r, ms));
+
+// Tipos de mensaje que no son texto y a los que sí hay que contestar ("solo leo texto").
+const TIPOS_NO_TEXTO = ['ptt', 'audio', 'image', 'video', 'sticker', 'document', 'location', 'vcard', 'multi_vcard'];
 
 // Usa el Chrome/Edge ya instalado (CHROME_PATH en .env o se busca solo).
 // Si no encuentra ninguno, usa el Chrome que descarga puppeteer.
@@ -30,6 +43,12 @@ function buscarNavegador() {
     '/usr/bin/chromium-browser',
   ];
   return candidatos.find((ruta) => ruta && fs.existsSync(ruta));
+}
+
+// Identificador corto y anónimo del estudiante para los logs (no se puede regresar al número).
+const SAL_LOG = crypto.randomBytes(8).toString('hex'); // cambia en cada arranque
+function idAnonimo(numero) {
+  return crypto.createHash('sha256').update(SAL_LOG + numero).digest('hex').slice(0, 8);
 }
 
 // La sesión de WhatsApp se guarda en una ruta corta: en Windows, si la ruta
@@ -71,6 +90,21 @@ const client = new Client({
   ...(NUMERO_BOT && { pairWithPhoneNumber: { phoneNumber: NUMERO_BOT, showNotification: true } }),
 });
 
+// Si el bot se queda sin conexión, se cierra con error para que pm2 lo vuelva a arrancar.
+// Antes solo escribía un aviso y se quedaba "vivo" pero sin contestar.
+let cerrando = false;
+async function cerrarParaReiniciar(motivo) {
+  if (cerrando) return;
+  cerrando = true;
+  console.error(`⚠️ ${motivo}. Cerrando el bot para que pm2 lo reinicie...`);
+  try {
+    await Promise.race([client.destroy(), esperar(10000)]);
+  } catch (_) {
+    // si no se puede cerrar el navegador, igual se sale
+  }
+  process.exit(1);
+}
+
 client.on('qr', (qr) => {
   if (NUMERO_BOT) return;
   console.log('Escanea este código QR con WhatsApp (Dispositivos vinculados):');
@@ -85,7 +119,9 @@ client.on('code', (codigo) => {
   console.log('"Vincular con el número de teléfono" y escribe el código.');
 });
 
+let conectado = false;
 client.on('ready', () => {
+  conectado = true;
   if (fs.existsSync(ARCHIVO_QR)) {
     fs.writeFileSync(ARCHIVO_QR, paginaQR('<h2>✅ Bot conectado a WhatsApp</h2><p>Ya puedes cerrar esta página.</p>'));
   }
@@ -93,8 +129,23 @@ client.on('ready', () => {
   console.log(ollama.OLLAMA_ACTIVO ? `🤖 IA local: Ollama (${ollama.OLLAMA_MODEL})` : '🤖 IA local desactivada (solo menú)');
 });
 
-client.on('auth_failure', (msg) => console.error('❌ Error de autenticación:', msg));
-client.on('disconnected', (razon) => console.warn('⚠️ WhatsApp desconectado:', razon));
+client.on('auth_failure', (msg) => cerrarParaReiniciar(`Error de autenticación (${msg})`));
+client.on('disconnected', (razon) => cerrarParaReiniciar(`WhatsApp desconectado (${razon})`));
+
+// Revisión periódica: si WhatsApp Web deja de estar conectado dos veces seguidas, se reinicia.
+let fallosSeguidos = 0;
+setInterval(async () => {
+  if (!conectado || cerrando) return;
+  try {
+    const estado = await Promise.race([client.getState(), esperar(30000).then(() => 'SIN_RESPUESTA')]);
+    fallosSeguidos = estado === 'CONNECTED' ? 0 : fallosSeguidos + 1;
+    if (fallosSeguidos > 0) console.warn(`[conexión] estado: ${estado}`);
+  } catch (err) {
+    fallosSeguidos += 1;
+    console.warn(`[conexión] no se pudo revisar (${err.message})`);
+  }
+  if (fallosSeguidos >= 2) cerrarParaReiniciar('La sesión de WhatsApp dejó de responder');
+}, REVISION_CONEXION_MS).unref();
 
 // Con el WhatsApp Web actual, whatsapp-web.js 1.34.7 sí envía el mensaje pero después
 // truena al buscarlo (el id ya no trae _serialized). Ese error se ignora para seguir
@@ -107,31 +158,44 @@ async function enviar(destino, contenido, opciones = {}) {
   }
 }
 
-client.on('message', async (msg) => {
-  // Solo chats individuales: ignora grupos, estados y mensajes sin texto.
-  if (msg.fromMe || msg.from.endsWith('@g.us') || msg.from === 'status@broadcast') return;
-  if (msg.type !== 'chat') return;
+// Contesta los mensajes que la cola ya juntó y ordenó.
+async function contestar(destino, texto) {
+  const respuestas = await responder(destino, texto);
+  for (const r of respuestas) {
+    if (r.tipo === 'imagen') {
+      await enviar(destino, MessageMedia.fromFilePath(r.archivo), { caption: r.texto });
+    } else {
+      await enviar(destino, r.texto);
+    }
+    await esperar(PAUSA_ENTRE_MENSAJES_MS);
+  }
+}
 
-  console.log(`📩 ${msg.from}: ${msg.body}`);
+const cola = crearCola(contestar, { esperaMs: ESPERA_MENSAJES_MS });
+
+client.on('message', async (msg) => {
+  // Solo chats individuales: ignora grupos, estados y mensajes propios.
+  if (msg.fromMe || msg.from.endsWith('@g.us') || msg.from === 'status@broadcast') return;
+
+  // Audios, fotos, stickers, etc.: antes se ignoraban sin contestar.
+  if (TIPOS_NO_TEXTO.includes(msg.type)) {
+    console.log(`📎 [${idAnonimo(msg.from)}] mandó ${msg.type}: se le pide escribir`);
+    enviar(msg.from, mensajes.soloTexto).catch((err) => console.error('Error al responder:', err.message));
+    return;
+  }
+  if (msg.type !== 'chat') return; // otros eventos (reacciones, avisos del sistema)
+
+  if (LOG_MENSAJES) console.log(`📩 ${msg.from}: ${msg.body}`);
+  else console.log(`📩 [${idAnonimo(msg.from)}] mensaje recibido (${msg.body.length} caracteres)`);
 
   // "Escribiendo..." es opcional: con algunas versiones de WhatsApp Web getChat() falla
   // y no debe impedir que el bot conteste.
   msg.getChat().then((chat) => chat.sendStateTyping()).catch(() => {});
 
-  try {
-    const respuestas = await responder(msg.from, msg.body);
-    for (const r of respuestas) {
-      if (r.tipo === 'imagen') {
-        await enviar(msg.from, MessageMedia.fromFilePath(r.archivo), { caption: r.texto });
-      } else {
-        await enviar(msg.from, r.texto);
-      }
-      await esperar(PAUSA_ENTRE_MENSAJES_MS);
-    }
-  } catch (err) {
-    console.error('Error al responder:', err);
-  }
+  cola.recibir(msg.from, msg.body);
 });
+
+process.on('unhandledRejection', (err) => console.error('[error sin manejar]', err && err.message ? err.message : err));
 
 ollama.precalentar();
 client.initialize().catch((err) => {

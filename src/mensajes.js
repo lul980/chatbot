@@ -6,12 +6,14 @@
 //
 // Formato de WhatsApp: *negritas*, _cursivas_, ~tachado~.
 
-const LINEA_ATENCION = '800 813 8500'; // guarda el número de T Queremos para reutilizarlo en varios mensajes
+// Número oficial de la Línea TQueremos (24 h, 365 días): https://tqueremos.tec.mx/es/orientame
+// ⚠️ Antes tenía un dígito equivocado (terminaba en 8500 en vez de 9500).
+const LINEA_ATENCION = '800 813 9500'; // guarda el número de T Queremos para reutilizarlo en varios mensajes
 
 const mensajes = { // objeto con todos los textos que manda el bot
 
   bienvenida: // primer mensaje que ve el estudiante
-    '¡Hola! 👋😊 Soy el asistente del *Botiquín para la calma* 🌿de LiFE Bienestar Estudiantil.\n\n' + // saludo y presentación del bot
+    '¡Hola! 👋😊 Soy el asistente del *Botiquín para la calma* 🌿 de LiFE Bienestar Estudiantil.\n\n' + // saludo y presentación del bot
     'Estoy aquí para darte un ejercicio rápido según cómo te sientas. ✨\n' + // explica para qué sirve el bot
     '_No sustituyo la atención de un profesional._ 🤝', // aviso de que no reemplaza a un profesional
 
@@ -41,6 +43,11 @@ const mensajes = { // objeto con todos los textos que manda el bot
 
   respuestaIgual: 'Está bien, a veces toma un poco más de tiempo 🕐💛. Probemos con otro ejercicio 👇:', // cuando responde "igual"
 
+  igualSinMas: // cuando responde "igual" pero ya vio los 5 ejercicios de la carta
+    'Está bien, a veces toma un poco más de tiempo 🕐💛. Ya vimos todos los ejercicios de esta carta ✅.\n\n' + // valida y avisa que ya no hay más
+    'Escribe *menú* 📋 para probar con otra carta.\n' + // ofrece otra carta
+    `Si sigues sintiéndote mal, puedes llamar a *T Queremos*: *${LINEA_ATENCION}* 📞`, // ofrece apoyo profesional
+
   respuestaPeor: // cuando el estudiante responde "peor"
     'Gracias por decírmelo 🙏. Lo que sientes es importante y no tienes que pasarlo solo/a. 💙🫂\n\n' + // validación emocional
     `📞 Llama al número de atención *T Queremos*: *${LINEA_ATENCION}*\n` + // da el teléfono de atención
@@ -52,6 +59,15 @@ const mensajes = { // objeto con todos los textos que manda el bot
 
   noEntendi: // cuando el bot no entiende el mensaje
     'Perdón, no te entendí bien. 😅🙈', // disculpa breve
+
+  fueraDeTema: // cuando hace una pregunta que no es sobre cómo se siente (horarios, entregas, trámites)
+    'Esa no la sé 😅. Yo solo te puedo compartir ejercicios del *Botiquín para la calma* según cómo te sientas. 🌿', // aclara qué sí puede hacer
+
+  otroSinCarta: // cuando pide "otro" pero todavía no ha elegido carta
+    'Primero elige una carta y luego te comparto más ejercicios 👇', // pide elegir carta
+
+  soloTexto: // cuando manda audio, foto, sticker, video o documento
+    'Por ahora solo puedo leer mensajes de texto 📝. Escríbeme cómo te sientes o responde con un número del menú. 💬', // explica que solo lee texto
 
   // ===== WELLNESS CENTER ===== (textos para cuando preguntan dónde está; la foto y el enlace se configuran en conversacion.js)
   // Acompaña la foto de la fachada del Wellness Center.

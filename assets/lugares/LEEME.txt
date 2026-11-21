@@ -1,2 +1,4 @@
 Guarda aqui la foto de la fachada del Wellness Center con el nombre: wellness-center.jpg
-Despues pega el enlace de Google Maps en src/conversacion.js (mapsUrl).
+Despues pon el enlace de Google Maps en el archivo .env:  WELLNESS_MAPS_URL=https://maps.app.goo.gl/...
+(o pegalo entre las comillas de mapsUrl en src/conversacion.js).
+Mientras falten los dos, el bot contesta que esta actualizando la ubicacion.
