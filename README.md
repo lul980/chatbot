@@ -11,13 +11,16 @@ La IA corre **local con Ollama** (sin costo por mensaje y los datos no salen del
 
 ```mermaid
 flowchart TD
-    A[Estudiante escribe] --> C{¿Palabras de riesgo?}
-    C -- Sí --> X[Mensaje de crisis: 800 813 8500, Línea de la Vida, 911]
+    A[Estudiante escribe] --> Q[Se juntan los mensajes seguidos]
+    Q --> C{¿Palabras de riesgo?}
+    C -- Sí --> X[Mensaje de crisis: T Queremos 800 813 9500, Línea de la Vida, 911]
     C -- No --> B[Bienvenida + menú de 6 cartas]
     B --> D{¿Cómo eligió?}
     D -- Número 1-6 --> E[Carta]
     D -- Palabras clave --> E
-    D -- Texto libre --> IA[Ollama clasifica y responde con empatía] --> E
+    D -- Texto libre --> IA{Ollama: ¿riesgo?}
+    IA -- Sí --> X
+    IA -- No --> E
     E --> F[Imagen de la carta + ejercicio al azar]
     F --> G{¿Cómo te sientes ahora?}
     G -- 1 Mejor --> H[Cierre positivo]
@@ -26,6 +29,10 @@ flowchart TD
 ```
 
 Comandos en cualquier momento: `menú`, `otro`, `hola`, `adiós`.
+
+- Si el estudiante manda varios mensajes seguidos, el bot espera un momento y los contesta juntos y en orden.
+- A audios, fotos y stickers el bot contesta que por ahora solo lee texto.
+- La IA también revisa los mensajes libres (3+ palabras) para detectar riesgo que la lista de palabras no cubra.
 
 ### Las 6 cartas (5 ejercicios cada una)
 
@@ -80,6 +87,17 @@ cp .env.example .env   # en Windows: copy .env.example .env
 npm run consola
 ```
 
+### Pruebas automáticas
+
+```bash
+npm test
+```
+
+Corre 37 pruebas (carpeta `test/`) sin WhatsApp ni Ollama: usan un Ollama y un WhatsApp **simulados**.
+Revisan la detección de crisis, el número de T Queremos, el seguimiento (mejor / igual / peor), los
+comandos, la ubicación, los mensajes seguidos, los audios, la privacidad de los logs y la reconexión.
+**Córranlas antes de subir cualquier cambio**, sobre todo si se edita `mensajes.js` o las palabras clave.
+
 ### Conectar a WhatsApp
 
 ```bash
@@ -103,7 +121,10 @@ El bot usa el Chrome o Edge que ya tengas instalado. Si `npm install` avisa que 
 | `OLLAMA_ACTIVO` | `true` | `false` = el bot funciona solo con menú y palabras clave |
 | `OLLAMA_URL` | `http://localhost:11434` | Dónde corre Ollama |
 | `OLLAMA_MODEL` | `llama3.2:3b` | Modelo. Con GPU se puede usar `llama3.1:8b` o `qwen2.5:7b` |
-| `OLLAMA_TIMEOUT_MS` | `30000` | Si la IA tarda más, el bot muestra el menú |
+| `OLLAMA_TIMEOUT_MS` | `12000` | Si la IA tarda más, el bot muestra el menú |
+| `ESPERA_MENSAJES_MS` | `1500` | Espera por si el estudiante manda varios mensajes seguidos (se contestan juntos) |
+| `LOG_MENSAJES` | `false` | `false` = los logs no guardan el número ni el texto del estudiante. `true` solo para pruebas |
+| `WELLNESS_MAPS_URL` | vacío | Enlace de Google Maps del Wellness Center (**pendiente**) |
 | `CHROME_PATH` | se busca solo | Navegador para WhatsApp Web (Chrome o Edge) |
 | `NUMERO_BOT` | vacío | Número del bot (521 + 10 dígitos) para vincular con código en vez de QR |
 | `SESION_PATH` | `~/.botiquin-bot` | Carpeta de la sesión de WhatsApp. Debe ser una ruta **corta** en Windows |
@@ -122,6 +143,10 @@ pm2 save
 pm2 startup
 ```
 
+Si WhatsApp se desconecta (o deja de responder dos revisiones seguidas, cada 5 min), el bot se cierra
+con error a propósito para que **pm2 lo vuelva a arrancar** solo. Por eso hay que correrlo con pm2.
+Si la sesión se cerró desde el celular, al reiniciar pedirá escanear el QR otra vez (`pm2 logs botiquin`).
+
 ## Estructura
 
 ```
@@ -129,14 +154,17 @@ src/
   mensajes.js      ← GUION: todos los textos del bot (lo edita el equipo de guion)
   botiquin.js      ← contenido de las 6 cartas y sus ejercicios
   conversacion.js  ← lógica del flujo (estados, menú, seguimiento, crisis)
-  ollama.js        ← conexión con la IA local
+  ollama.js        ← conexión con la IA local (incluye la categoría "riesgo")
+  cola.js          ← junta los mensajes seguidos de cada estudiante y los contesta en orden
   whatsapp.js      ← conexión con WhatsApp
   consola.js       ← modo de prueba en terminal
+test/              ← pruebas automáticas (npm test)
 assets/cartas/     ← imágenes de las cartas
+assets/lugares/    ← foto del Wellness Center (pendiente)
 ```
 
 ## Aviso
 
 Este bot ofrece ejercicios de bienestar y **no sustituye la atención psicológica profesional**.
-Si detecta palabras de riesgo, comparte de inmediato el número de atención T Queremos (800 813 8500),
+Si detecta palabras de riesgo, comparte de inmediato el número de atención T Queremos (800 813 9500),
 la Línea de la Vida (800 911 2000) y el 911.

@@ -5,7 +5,8 @@
   "main": "src/whatsapp.js",
   "scripts": {
     "start": "node src/whatsapp.js",
-    "consola": "node src/consola.js"
+    "consola": "node src/consola.js",
+    "test": "node --test"
   },
   "engines": {
     "node": ">=18"
