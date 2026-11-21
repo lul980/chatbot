@@ -98,6 +98,19 @@ Revisan la detección de crisis, el número de T Queremos, el seguimiento (mejor
 comandos, la ubicación, los mensajes seguidos, los audios, la privacidad de los logs y la reconexión.
 **Córranlas antes de subir cualquier cambio**, sobre todo si se edita `mensajes.js` o las palabras clave.
 
+### Probar la IA con Ollama real
+
+Con Ollama abierto y el modelo descargado (`ollama pull llama3.2:3b`):
+
+```bash
+npm run probar-ia
+```
+
+Manda 13 mensajes de prueba y muestra qué categoría eligió la IA, qué contestó el bot y cuánto tardó.
+Las 6 frases de riesgo **no** están en la lista de palabras de crisis a propósito: si alguna sale con
+❌ GRAVE, la IA no la detectó y hay que agregarla a `PALABRAS_CRISIS` en `src/conversacion.js`
+(o probar un modelo más grande). Si la IA tarda más del límite, sube `OLLAMA_TIMEOUT_MS` en `.env`.
+
 ### Conectar a WhatsApp
 
 ```bash

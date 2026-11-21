@@ -6,7 +6,8 @@
   "scripts": {
     "start": "node src/whatsapp.js",
     "consola": "node src/consola.js",
-    "test": "node --test"
+    "test": "node --test",
+    "probar-ia": "node scripts/probar-ollama.js"
   },
   "engines": {
     "node": ">=18"
