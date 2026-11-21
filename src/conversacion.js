@@ -43,6 +43,7 @@ const PALABRAS_CRISIS = [ // palabras y frases que activan el mensaje de crisis
   'desaparecer para siempre', 'no quiero despertar', 'ya no quiero estar aqui', 'mejor sin mi', // parte 5
   'sentido a la vida', 'sentido a mi vida', 'la vida no tiene sentido', 'sentido a nada', 'nada tiene sentido', // parte 6
   'soy una carga', 'ser una carga', 'ya no aguanto', 'no tengo salida', 'no le veo salida', // parte 6b (frases que la IA no detectó siempre)
+  'que esto se acabe', 'que todo se acabe', 'que esto termine', 'que todo termine', 'acabar con esto', // parte 6c
   'colgarme', 'ahorcarme', 'envenenarme', // parte 7
   // hacerse daño
   'lastimarme', 'me lastimo', 'me quiero lastimar', 'cortarme', 'me corto', 'me he cortado', // parte 8

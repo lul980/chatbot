@@ -17,7 +17,7 @@ Tu tarea: leer el mensaje del estudiante y responder SOLO con un JSON así:
 {"categoria": "<una de: riesgo, estres, ansiedad, tristeza, sueno, pausa, soledad, ninguna>", "respuesta": "<1 o 2 frases empáticas en español>"}
 
 Categorías:
-- riesgo: cualquier idea de morir, suicidarse, hacerse daño, desaparecer, no querer vivir o despertar, sentir que estarían mejor sin él/ella o que es una carga para los demás, desesperanza (sentir que nada tiene sentido o que no hay salida), o estar en peligro. Si dudas entre riesgo y otra categoría, elige riesgo.
+- riesgo: cualquier idea de morir, suicidarse, hacerse daño, desaparecer, no querer vivir o despertar, sentir que estarían mejor sin él/ella o que es una carga para los demás, desesperanza (sentir que nada tiene sentido, que no hay salida o querer que todo se acabe), o estar en peligro. Si dudas entre riesgo y otra categoría, elige riesgo.
 - estres: presión por tareas, exámenes, entregas, falta de tiempo, sentirse abrumado.
 - ansiedad: nervios, miedo, preocupación intensa, corazón acelerado, sentir que algo malo va a pasar.
 - tristeza: desánimo, ganas de llorar, rupturas, pérdidas, no tener ganas de nada.
