@@ -41,7 +41,8 @@ const PALABRAS_CRISIS = [ // palabras y frases que activan el mensaje de crisis
   'no quiero seguir viviendo', 'no quiero seguir con vida', 'no vale la pena vivir', 'estar muerto', 'estar muerta', // parte 3
   'mejor muerto', 'mejor muerta', 'no existiera', 'dejar de existir', 'no quiero existir', 'quiero desaparecer', // parte 4
   'desaparecer para siempre', 'no quiero despertar', 'ya no quiero estar aqui', 'mejor sin mi', // parte 5
-  'no le veo sentido a la vida', 'la vida no tiene sentido', 'ya no aguanto', 'no tengo salida', 'no le veo salida', // parte 6
+  'sentido a la vida', 'sentido a mi vida', 'la vida no tiene sentido', 'sentido a nada', 'nada tiene sentido', // parte 6
+  'soy una carga', 'ser una carga', 'ya no aguanto', 'no tengo salida', 'no le veo salida', // parte 6b (frases que la IA no detectó siempre)
   'colgarme', 'ahorcarme', 'envenenarme', // parte 7
   // hacerse daño
   'lastimarme', 'me lastimo', 'me quiero lastimar', 'cortarme', 'me corto', 'me he cortado', // parte 8
